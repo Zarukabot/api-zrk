@@ -1,274 +1,288 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Modern API documentation and interactive testing interface. Explore our powerful APIs with ease.">
-    <meta name="keywords" content="API, API Documentation, REST API, Zaruka API, Zaruka, Developer Tools">
-    <meta name="author" content="Zaruka">
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://api.vgxteam.xyz/">
-    <meta property="og:title" content="Zaruka Api'S - Modern API Documentation">
-    <meta property="og:description" content="Explore our various API endpoints with a modern and easy-to-use interface. Free APIs for developers including AI, random images, and more.">
-    <meta property="og:image" content="https://api.vgxteam.xyz/api/preview-image">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:site_name" content="Raol Api'S">
-    <meta property="og:locale" content="en_US">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://api.vgxteam.xyz/">
-    <meta name="twitter:title" content="Raol Api'S - Modern API Documentation">
-    <meta name="twitter:description" content="Explore our various API endpoints with a modern and easy-to-use interface. Free APIs for developers including AI, random images, and more.">
-    <meta name="twitter:image" content="https://api.vgxteam.xyz/api/preview-image">
-    <meta name="twitter:image:alt" content="Raol Api'S - Modern API Documentation Interface">
-    
-    <!-- Additional Meta Tags -->
-    <meta name="theme-color" content="#ffffff">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-TileImage" content="/src/icon.png">
-    
-    <!-- WhatsApp specific -->
-    <meta property="og:image:secure_url" content="https://api.vgxteam.xyz/api/preview-image">
-    
-    <link rel="icon" href="/src/icon.png" type="image/png">
-    <link rel="apple-touch-icon" href="/src/icon.png">
-    <link rel="shortcut icon" href="/src/icon.png">
-    
-    <title id="page">Raol Api'S</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-    <link rel="stylesheet" href="/assets/styles.css">
-    
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Zaruka Api'S",
-      "description": "Modern API documentation and interactive testing interface",
-      "url": "https://api.vgxteam.xyz/",
-      "author": {
-        "@type": "Organization",
-        "name": "ZRK Team"
-      },
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://api.vgxteam.xyz/?search={search_term_string}",
-        "query-input": "required name=search_term_string"
+import express from "express"
+import chalk from "chalk"
+import fs from "fs"
+import cors from "cors"
+import path from "path"
+import { fileURLToPath, pathToFileURL } from "url"
+import { createRequire } from "module"
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const require = createRequire(import.meta.url)
+
+const app = express()
+const PORT = process.env.PORT || 4000
+
+app.enable("trust proxy")
+app.set("json spaces", 2)
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+app.use(cors())
+
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff")
+  res.setHeader("X-Frame-Options", "DENY")
+  res.setHeader("X-XSS-Protection", "1; mode=block")
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin")
+  next()
+})
+
+const requestCounts = new Map()
+const RATE_LIMIT_WINDOW = 1 * 60 * 1000
+const RATE_LIMIT_MAX = 15
+
+app.use((req, res, next) => {
+  const ip = req.ip || req.connection.remoteAddress
+  const now = Date.now()
+
+  if (!requestCounts.has(ip)) {
+    requestCounts.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW })
+  } else {
+    const data = requestCounts.get(ip)
+    if (now > data.resetTime) {
+      data.count = 1
+      data.resetTime = now + RATE_LIMIT_WINDOW
+    } else {
+      data.count++
+      if (data.count > RATE_LIMIT_MAX) {
+        return res.status(429).sendFile(path.join(__dirname, "api-page", "429.html"))
       }
     }
-    </script>
-</head>
-<body>
-    <div id="loadingScreen" role="status" aria-live="polite">
-        <div class="spinner-wrapper">
-            <svg class="spinner-logo" width="80" height="80" viewBox="0 0 100 100" aria-hidden="true">
-                <circle class="spinner-path" cx="50" cy="50" r="40" fill="none" stroke-width="8" />
-                <circle class="spinner-animation" cx="50" cy="50" r="40" fill="none" stroke-width="8" />
-            </svg>
-            <p>Loading<span class="loading-dots">...</span></p>
-          </div>  
-         <h5 class="copyright-text">© 2025 Api Zaruka dev. All rights reserved.</h5>
-       </div>
+  }
+  next()
+})
 
-    <aside class="side-nav" id="sideNavigation" aria-label="Main Navigation">
-        <div class="side-nav-logo">            
-            <span id="sideNavName">API</span>
-            <div id="versionHeader" class="badge-pill"></div>
-        </div>
-        
-        <nav class="side-nav-links" aria-label="Navigation Links">
-            <a href="#Home" class="side-nav-link active" aria-current="page">
-                <i class="fas fa-home" aria-hidden="true"></i>
-                <span>Home</span>
-            </a>
-            <a href="#APIs" class="side-nav-link">
-                <i class="fas fa-plug" aria-hidden="true"></i>
-                <span>APIs</span>
-            </a>
-            <a href="/support" class="side-nav-link">
-                <i class="fas fa-heart" aria-hidden="true"></i>
-                <span>Support</span>
-            </a>
-        </nav>
-        
-    </aside>
+setInterval(() => {
+  const now = Date.now()
+  for (const [ip, data] of requestCounts.entries()) {
+    if (now > data.resetTime) {
+      requestCounts.delete(ip)
+    }
+  }
+}, RATE_LIMIT_WINDOW)
 
-    <div class="main-wrapper">
-        <header class="main-header" role="banner">
-            <button class="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="sideNavigation">
-                <i class="fas fa-bars" aria-hidden="true"></i>
-            </button>
-            
-            <div class="search-container" role="search">
-                <div class="input-group">
-                    <span class="input-group-text" aria-hidden="true"><i class="fas fa-search"></i></span>
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search API..." aria-label="Search API">
-                    <button class="clear-search" id="clearSearch" aria-label="Clear search">
-                        <i class="fas fa-times" aria-hidden="true"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="header-actions">
-                <button class="notification-bell" id="notificationBell" aria-label="Notifications">
-                    <i class="far fa-bell" aria-hidden="true"></i>
-                    <span class="notification-badge" id="notificationBadge" aria-hidden="true"></span>
-                </button>
-            </div>
-        </header>
-        
-        <main id="mainContent">
-            <section id="Home" class="hero-section" aria-labelledby="heroHeading">
-                <div class="hero-content">
-                    <div class="hero-heading">
-                        <h1 id="name" class="gradient-text">Zaruka Api'S</h1>
-                        <div id="version" class="badge-pill">v1.0</div>
-                    </div>
-                    
-                    <p id="description" class="hero-description">A simple and easily customizable API documentation interface.</p>
-                </div>
-                
-                <div class="hero-visual" aria-hidden="true">
-                    <div class="banner-container">
-                        <img id="dynamicImage" class="banner" src="/src/banner.jpg" alt="Banner API">
-                    </div>
-                    <div class="shape shape-1"></div>
-                    <div class="shape shape-2"></div>
-                    <div class="shape shape-3"></div>
-                </div>
-            </section>
-            
-            <section id="APIs" class="api-section" aria-labelledby="apiSectionTitle">
-                <h2 id="apiSectionTitle" class="section-title">Available APIs</h2>
-                <p class="section-description">Explore our collection of powerful and easy-to-use APIs.</p>
-                
-                <div class="tab-content" id="apiContent">
-                    </div>
-            </section>
-        </main>
-        
-        <footer class="main-footer" role="contentinfo">
-            <div class="footer-content">
-                <div id="wm" class="copyright">&copy; 2025 Api Zaruka dev. All rights reversed.</div>
-                <div class="footer-middle">
-                    <div class="theme-switcher">
-                        <span>Light</span>
-                        <label class="switch" aria-label="Toggle dark/light theme">
-                            <input type="checkbox" id="themeToggle">
-                            <span class="slider round" aria-hidden="true"></span>
-                        </label>
-                        <span>Dark</span>
-                    </div>
-                </div>
-                
-                <nav class="footer-links" aria-label="Additional links">
-                    <a href="https://whatsapp.com/channel/0029VbAi8n811ulGIozTyF3x" target="_blank" rel="noopener noreferrer" class="footer-link">
-                        <i class="fab fa-whatsapp" aria-hidden="true"></i> Info
-                    </a>
-                    <a href="https://whatsapp.com/channel/0029VbAi8n811ulGIozTyF3x" target="_blank" rel="noopener noreferrer" class="footer-link">
-                        <i class="fas fa-envelope" aria-hidden="true"></i> Contact
-                    </a>
-                </nav>
-            </div>
-        </footer>
-    </div>
+app.use((req, res, next) => {
+  try {
+    const settings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"))
 
-    <!-- Sponsored Ads Modal -->
-    <div class="modal fade" id="sponsorModal" tabindex="-1" aria-labelledby="sponsorModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered modal-lg sponsor-modal-dialog">
-            <div class="modal-content sponsor-modal-content">
-                <div class="sponsor-modal-header">
-                    <h3 class="sponsor-modal-title" id="sponsorModalLabel">Sponsored Ads</h3>
-                    <button type="button" class="sponsor-close-btn" data-bs-dismiss="modal" aria-label="Close">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="sponsor-modal-body" id="sponsorModalBody">
-                    <!-- Sponsor content will be dynamically loaded here -->
-                </div>
-                <div class="sponsor-modal-footer">
-                    <p class="sponsor-support-text">Support these amazing services ❤</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    const skipPaths = ["/api/settings", "/assets/", "/src/", "/api/preview-image", "/api-page/sponsor.json", "/support"]
+    const shouldSkip = skipPaths.some((path) => req.path.startsWith(path))
 
-    <div class="modal fade" id="apiResponseModal" tabindex="-1" aria-labelledby="apiResponseModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg" id="modalDialog" role="document">
-            <div class="modal-content">
-                <header class="modal-header">
-                    <div>
-                        <h3 class="modal-title" id="apiResponseModalLabel">API Name</h3>
-                        <p class="modal-desc mb-0" id="apiResponseModalDesc">API Description.</p>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                        <i class="fas fa-times" aria-hidden="true"></i>
-                    </button>
-                </header>
-                <div class="modal-body">
-                    <section class="endpoint-container" aria-labelledby="endpointLabel">
-                        <div class="endpoint-label">
-                            <span id="endpointLabel">Endpoint</span>
-                            <button class="copy-btn" id="copyEndpoint" title="Copy to clipboard" aria-label="Copy endpoint">
-                                <i class="far fa-copy" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                        <pre id="apiEndpoint" class="code-block" tabindex="0"></pre>
-                    </section>
-                    
-                    <div id="apiQueryInputContainer" class="query-input-container">
-                        </div>
-                    
-                    <div id="apiResponseLoading" class="d-none" role="status" aria-live="polite">
-                        <svg class="spinner-logo" width="50" height="50" viewBox="0 0 100 100" aria-hidden="true">
-                            <circle class="spinner-path" cx="50" cy="50" r="40" fill="none" stroke-width="8" />
-                            <circle class="spinner-animation" cx="50" cy="50" r="40" fill="none" stroke-width="8" />
-                        </svg>
-                        <p>Processing request...</p>
-                    </div>
-                    
-                    <section class="response-container d-none" id="responseContainer" aria-labelledby="responseLabel">
-                        <div class="response-label">
-                            <span id="responseLabel">Response</span>
-                            <button class="copy-btn" id="copyResponse" title="Copy to clipboard" aria-label="Copy response">
-                                <i class="far fa-copy" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                        <pre id="apiResponseContent" class="code-block d-none" tabindex="0"></pre>
-                    </section>
-                </div>
-                <footer class="modal-footer">
-                    <button id="submitQueryBtn" class="btn btn-primary" disabled>
-                        <span>Submit</span>
-                        <i class="fas fa-paper-plane ms-2" aria-hidden="true"></i>
-                    </button>
-                </footer>
-            </div>
-        </div>
-    </div>
+    if (settings.maintenance && settings.maintenance.enabled && !shouldSkip) {
+      if (req.path.startsWith("/api/") || req.path.startsWith("/ai/")) {
+        return res.status(503).json({
+          status: false,
+          error: "Service temporarily unavailable",
+          message: "The API is currently under maintenance. Please try again later.",
+          maintenance: true,
+          creator: settings.apiSettings?.creator || "VGX Team",
+        })
+      }
 
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <header class="toast-header">
-                <i class="toast-icon fas fa-info-circle me-2" aria-hidden="true"></i>
-                <strong class="me-auto toast-title">Notification</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </header>
-            <div class="toast-body">
-                This is a notification message.
-            </div>
-        </div>
-    </div>
+      return res.status(503).sendFile(path.join(__dirname, "api-page", "maintenance.html"))
+    }
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/script.js"></script>
-</body>
-</html>
+    next()
+  } catch (error) {
+    console.error("Error checking maintenance mode:", error)
+    next()
+  }
+})
+
+app.get("/assets/styles.css", (req, res) => {
+  res.setHeader("Content-Type", "text/css")
+  res.sendFile(path.join(__dirname, "api-page", "styles.css"))
+})
+
+app.get("/assets/script.js", (req, res) => {
+  res.setHeader("Content-Type", "application/javascript")
+  res.sendFile(path.join(__dirname, "api-page", "script.js"))
+})
+
+app.get("/api-page/sponsor.json", (req, res) => {
+  try {
+    const sponsorData = JSON.parse(fs.readFileSync(path.join(__dirname, "api-page", "sponsor.json"), "utf-8"))
+    res.json(sponsorData)
+  } catch (error) {
+    res.status(500).json({ error: "Failed to load sponsor data" })
+  }
+})
+
+app.get("/api/preview-image", (req, res) => {
+  try {
+    const previewImagePath = path.join(__dirname, "src", "preview.png")
+
+    if (fs.existsSync(previewImagePath)) {
+      res.setHeader("Content-Type", "image/png")
+      res.setHeader("Cache-Control", "public, max-age=86400")
+      res.sendFile(previewImagePath)
+    } else {
+      const bannerPath = path.join(__dirname, "src", "banner.jpg")
+      if (fs.existsSync(bannerPath)) {
+        res.setHeader("Content-Type", "image/jpeg")
+        res.setHeader("Cache-Control", "public, max-age=86400")
+        res.sendFile(bannerPath)
+      } else {
+        const iconPath = path.join(__dirname, "src", "icon.png")
+        res.setHeader("Content-Type", "image/png")
+        res.setHeader("Cache-Control", "public, max-age=86400")
+        res.sendFile(iconPath)
+      }
+    }
+  } catch (error) {
+    console.error("Error serving preview image:", error)
+    res.status(404).json({ error: "Preview image not found" })
+  }
+})
+
+app.get("/api/settings", (req, res) => {
+  try {
+    const settings = JSON.parse(fs.readFileSync(path.join(__dirname, "src", "settings.json"), "utf-8"))
+    res.json(settings)
+  } catch (error) {
+    res.status(500).sendFile(path.join(__dirname, "api-page", "500.html"))
+  }
+})
+
+app.get("/api/notifications", (req, res) => {
+  try {
+    const notifications = JSON.parse(fs.readFileSync(path.join(__dirname, "api-page", "notifications.json"), "utf-8"))
+    res.json(notifications)
+  } catch (error) {
+    res.status(500).sendFile(path.join(__dirname, "api-page", "500.html"))
+  }
+})
+
+// Support page route - Add this BEFORE the blocking middleware
+app.get("/support", (req, res) => {
+  res.sendFile(path.join(__dirname, "api-page", "support.html"))
+})
+
+app.use((req, res, next) => {
+  const blockedPaths = [
+    "/api-page/",
+    "/src/settings.json",
+    "/api-page/notifications.json",
+    "/api-page/styles.css",
+    "/api-page/script.js",
+  ]
+
+  const isBlocked = blockedPaths.some((blocked) => {
+    if (blocked.endsWith("/")) {
+      return req.path.startsWith(blocked)
+    }
+    return req.path === blocked
+  })
+
+  if (isBlocked) {
+    return res.status(403).sendFile(path.join(__dirname, "api-page", "403.html"))
+  }
+  next()
+})
+
+app.use("/src", (req, res, next) => {
+  if (req.path.match(/\.(jpg|jpeg|png|gif|svg|ico)$/i)) {
+    express.static(path.join(__dirname, "src"))(req, res, next)
+  } else {
+    res.status(403).sendFile(path.join(__dirname, "api-page", "403.html"))
+  }
+})
+
+const settingsPath = path.join(__dirname, "./src/settings.json")
+const settings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"))
+
+app.use((req, res, next) => {
+  const originalJson = res.json
+  res.json = function (data) {
+    if (data && typeof data === "object") {
+      const responseData = {
+        status: data.status ?? true,
+        creator: settings.apiSettings.creator || "ZRK HD",
+        ...data,
+      }
+      return originalJson.call(this, responseData)
+    }
+    return originalJson.call(this, data)
+  }
+  next()
+})
+
+let totalRoutes = 0
+const apiFolder = path.join(__dirname, "./src/api")
+
+const loadApiRoutes = async () => {
+  const subfolders = fs.readdirSync(apiFolder)
+
+  for (const subfolder of subfolders) {
+    const subfolderPath = path.join(apiFolder, subfolder)
+    if (fs.statSync(subfolderPath).isDirectory()) {
+      const files = fs.readdirSync(subfolderPath)
+
+      for (const file of files) {
+        const filePath = path.join(subfolderPath, file)
+        if (path.extname(file) === ".js") {
+          try {
+            const module = await import(pathToFileURL(filePath).href)
+            const routeHandler = module.default
+            if (typeof routeHandler === "function") {
+              routeHandler(app)
+              totalRoutes++
+              console.log(
+                chalk
+                  .bgHex("#FFFF99")
+                  .hex("#333")
+                  .bold(` Loaded Route: ${path.basename(file)} `),
+              )
+            }
+          } catch (error) {
+            console.error(`Error loading route ${file}:`, error)
+          }
+        }
+      }
+    }
+  }
+}
+
+await loadApiRoutes()
+
+console.log(chalk.bgHex("#90EE90").hex("#333").bold(" Load Complete! ✓ "))
+console.log(chalk.bgHex("#90EE90").hex("#333").bold(` Total Routes Loaded: ${totalRoutes} `))
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "api-page", "index.html"))
+})
+
+app.use((req, res, next) => {
+  res.status(404).sendFile(path.join(__dirname, "api-page", "404.html"))
+})
+
+app.use((err, req, res, next) => {
+  console.error(err.stack)
+
+  if (err.status === 400) {
+    res.status(400).sendFile(path.join(__dirname, "api-page", "400.html"))
+  } else if (err.status === 401) {
+    res.status(401).sendFile(path.join(__dirname, "api-page", "401.html"))
+  } else if (err.status === 403) {
+    res.status(403).sendFile(path.join(__dirname, "api-page", "403.html"))
+  } else if (err.status === 405) {
+    res.status(405).sendFile(path.join(__dirname, "api-page", "405.html"))
+  } else if (err.status === 408) {
+    res.status(408).sendFile(path.join(__dirname, "api-page", "408.html"))
+  } else if (err.status === 429) {
+    res.status(429).sendFile(path.join(__dirname, "api-page", "429.html"))
+  } else if (err.status === 502) {
+    res.status(502).sendFile(path.join(__dirname, "api-page", "502.html"))
+  } else if (err.status === 503) {
+    res.status(503).sendFile(path.join(__dirname, "api-page", "503.html"))
+  } else {
+    res.status(500).sendFile(path.join(__dirname, "api-page", "500.html"))
+  }
+})
+
+app.listen(PORT, () => {
+  console.log(chalk.bgHex("#90EE90").hex("#333").bold(` Server is running on port ${PORT} `))
+})
+
+export default app
