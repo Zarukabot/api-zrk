@@ -1,8 +1,8 @@
 {
-  "enabled": true,
+  "enabled": false,
   "title": "Sponsored Ads",
   "subtitle": "Support these amazing services ❤",
-  "showOnLoad": false,
+  "showOnLoad": true,
   "showInterval": 300000,
   "sponsors": [
     {
