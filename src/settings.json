@@ -84,8 +84,17 @@
     "params": {
       "text": "NIK yang ingin dicek, harus 16 digit (required)"
     }
-  }
-]
+  },
+          {
+      "name": "Text to Base64",
+      "desc": "Mengonversi teks menjadi format Base64",
+      "path": "/api/base64?text=",
+      "status": "ready",
+      "params": {
+        "text": "Teks yang ingin dikonversi ke Base64 (required)"
+        }
+    }
+  ]
      },
     {
       "name": "System Monitoring",
