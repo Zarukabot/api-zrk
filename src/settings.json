@@ -59,10 +59,8 @@
     "path": "/api/skiplink?url=",
     "status": "ready",
     "params": {
-      "url": "The URL to bypass (required)"
+      "text": "The URL to bypass (required)"
     }
-  }
-      ]
   },
         {
           "name": "BRAT Video Generator",
