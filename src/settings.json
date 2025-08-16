@@ -23,7 +23,7 @@
           "name": "LuminAI",
           "desc": "Advanced AI assistant powered by LuminAI for intelligent conversations",
           "path": "/ai/luminai?text=",
-          "status": "ready",
+          "status": "error",
           "params": {
             "text": "Text message for the AI to respond to"
           }
@@ -53,15 +53,6 @@
             "text": "Text to be inserted into the BRAT image (required)"
           }
         },
-  {
-    "name": "Skiplink",
-    "desc": "Bypass shortlink URLs to get the original link",
-    "path": "/api/skiplink?url=",
-    "status": "ready",
-    "params": {
-      "text": "The URL to bypass (required)"
-    }
-  },
         {
           "name": "BRAT Video Generator",
           "desc": "Generate animated BRAT-style text videos with customizable colors and backgrounds",
@@ -83,6 +74,15 @@
     "status": "ready",
     "params": {
       "text": "NIK yang ingin dicek, harus 16 digit (required)"
+    }
+  },
+          {
+    "name": "Skiplink",
+    "desc": "Bypass shortlink URLs to get the original link",
+    "path": "/api/skiplink?url=",
+    "status": "ready",
+    "params": {
+      "text": "The URL to bypass (required)"
     }
   },
           {
