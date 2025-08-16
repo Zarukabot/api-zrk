@@ -661,11 +661,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!settings || Object.keys(settings).length === 0) return
 
     const currentYear = new Date().getFullYear()
-    const creator = settings.apiSettings?.creator || "Raol Api'S"
+    const creator = settings.apiSettings?.creator || "Zaruka Api'S"
 
-    setPageContent(DOM.pageTitle, settings.name, "Raol Api'S")
-    setPageContent(DOM.wm, `© ${currentYear} Raol Api'S Corp. All rights reversed.`)
-    setPageContent(DOM.appName, settings.name, "Raol Api'S")
+    setPageContent(DOM.pageTitle, settings.name, "Zaruka Api'S")
+    setPageContent(DOM.wm, `© ${currentYear} 2025 Api Zaruka dev. All rights reversed.`)
+    setPageContent(DOM.appName, settings.name, "Zaruka Api'S")
     setPageContent(DOM.sideNavName, settings.name || "API")
     setPageContent(DOM.versionBadge, settings.version, "v1.0")
     setPageContent(DOM.versionHeaderBadge, settings.header?.status, "Active!")
