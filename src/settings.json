@@ -82,7 +82,7 @@
     "path": "/api/nik?nik=",
     "status": "ready",
     "params": {
-      "nik": "NIK yang ingin dicek, harus 16 digit (required)"
+      "text": "NIK yang ingin dicek, harus 16 digit (required)"
     }
   }
 ]
