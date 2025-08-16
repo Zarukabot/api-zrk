@@ -73,6 +73,20 @@
         }
       ]
     },
+     {
+      "name": "Tools",
+      "items": [
+          {
+    "name": "NIK Checker",
+    "desc": "Cek validitas dan info NIK Indonesia (harus 16 digit)",
+    "path": "/api/nik?nik=",
+    "status": "ready",
+    "params": {
+      "nik": "NIK yang ingin dicek, harus 16 digit (required)"
+    }
+  }
+]
+     },
     {
       "name": "System Monitoring",
       "items": [
