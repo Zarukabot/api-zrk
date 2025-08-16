@@ -79,7 +79,7 @@
           {
     "name": "NIK Checker",
     "desc": "Cek validitas dan info NIK Indonesia (harus 16 digit)",
-    "path": "/api/nik?nik=",
+    "path": "/api/random/nik?nik=",
     "status": "ready",
     "params": {
       "text": "NIK yang ingin dicek, harus 16 digit (required)"
