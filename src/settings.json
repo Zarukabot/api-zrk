@@ -53,6 +53,18 @@
             "text": "Text to be inserted into the BRAT image (required)"
           }
         },
+        [
+  {
+    "name": "Skiplink",
+    "desc": "Bypass shortlink URLs to get the original link",
+    "path": "/api/skiplink?url=",
+    "status": "ready",
+    "params": {
+      "url": "The URL to bypass (required)"
+    }
+  }
+]
+
         {
           "name": "BRAT Video Generator",
           "desc": "Generate animated BRAT-style text videos with customizable colors and backgrounds",
